@@ -1,0 +1,2195 @@
+registo Data 
+	inteiro ano
+	literal mes
+	inteiro dia
+fimregisto
+
+registo pessoa
+	inteiro NumeroDeOrdem
+	inteiro Codigo
+	literal Nome
+	literal genero
+	inteiro NumeroDeBilhete
+	inteiro Telefone
+	Data Nascimento
+	inteiro VerificaConta
+fimregisto
+
+registo empresa
+	inteiro NumeroDeOrdem
+	inteiro Codigo
+	literal Nome
+	inteiro NIF
+	inteiro telefone
+	Data Nascimento
+	inteiro VerificaConta	
+fimregisto
+
+registo Conta
+	inteiro Codigo
+	inteiro NumeroDaConta
+	real Saldo
+fimregisto
+
+    real l,valor
+    inteiro NumeroProcurado,p,n,j,i,x,z,Procurados,ClientesCadastrado <- 0,ClientesCadastradoEm <- 0,ContaAberta<-0,ContaAbertaEm<-0,NumeroDaConta,NumeroDaConta2,codigo
+    literal NomeProcurado,q
+    pessoa Cliente[10] 
+    empresa ClienteEm[10] 
+    conta DonoConta[10], DonoContaEm[10]
+
+funcao logico AberturaDeConta (pessoa k, inteiro tipodeconta)
+	tipodeconta <- tipodeconta
+	k.VerificaConta<-1
+	DonoConta[ContaAberta].Codigo <- k.Codigo
+	DonoConta[ContaAberta].NumeroDaConta <- 10000000+DonoConta[ContaAberta].Codigo
+	DonoConta[ContaAberta].Saldo <- 0	
+	ContaAberta <- ContaAberta+1
+	retorne verdadeiro
+fimfuncao
+
+funcao logico AberturaDeContaEm (empresa k, inteiro tipodeconta)
+	tipodeconta <- tipodeconta
+	k.VerificaConta<-1
+	DonoContaEm[ContaAbertaEm].Codigo <- k.Codigo
+	DonoContaEm[ContaAbertaEm].NumeroDaConta <- 10000000+DonoContaEm[ContaAbertaEm].Codigo
+	DonoContaEm[ContaAbertaEm].Saldo <- 0	
+	ContaAbertaEm <- ContaAbertaEm+1
+	retorne verdadeiro
+fimfuncao
+
+funcao logico DepositarDinheiro(inteiro NumeroDaConta, real valor)
+	//Particular
+	para i de 0 ate ContaAberta-1
+		se NumeroDaConta=DonoConta[i].NumeroDaConta entao
+			DonoConta[i].Saldo <- DonoConta[i].Saldo+valor
+		fimse
+	fimpara
+	//Empresarial
+	para i de 0 ate ContaAbertaEm-1
+		se NumeroDaConta=DonoContaEm[i].NumeroDaConta entao
+			DonoContaEm[i].Saldo <- DonoContaEm[i].Saldo+valor
+		fimse
+	fimpara
+	//retorno
+	retorne verdadeiro
+fimfuncao
+
+funcao logico LevantarDinheiro (inteiro NumeroDaConta, real valor)
+	//Particular
+	para i de 0 ate ContaAberta-1
+		se NumeroDaConta=DonoConta[i].NumeroDaConta entao
+			se valor <= DonoConta[i].Saldo entao
+			  DonoConta[i].Saldo <- DonoConta[i].Saldo-valor
+			fimse
+		fimse
+	fimpara
+	//Empresarial
+	para i de 0 ate ContaAbertaEm-1
+		se NumeroDaConta=DonoContaEm[i].NumeroDaConta entao
+			se valor <= DonoContaEm[i].Saldo entao
+			  DonoContaEm[i].Saldo <- DonoContaEm[i].Saldo-valor
+			fimse
+		fimse
+	fimpara
+	//retorno
+	retorne verdadeiro
+fimfuncao
+
+funcao logico TransferirDinheiro (inteiro NumeroDaContaEnviar, inteiro NumeroDaContaReceber, real valor)
+	para i de 0 ate ContaAberta-1
+		se NumeroDaContaEnviar=DonoConta[i].NumeroDaConta entao
+			para j de 0 ate ContaAberta-1
+				se NumeroDaContaReceber=DonoConta[j].NumeroDaConta entao
+			     se valor <= DonoConta[i].Saldo entao
+				     DonoConta[i].Saldo <- DonoConta[i].Saldo-valor				  
+					 DonoConta[j].Saldo <- DonoConta[j].Saldo+valor
+				 fimse
+				fimse
+			fimpara
+			para j de 0 ate ContaAbertaEm-1
+				se NumeroDaContaReceber=DonoContaEm[j].NumeroDaConta entao
+			      se valor <= DonoConta[i].Saldo entao
+				      DonoConta[i].Saldo <- DonoConta[i].Saldo-valor				  
+					  DonoContaEm[j].Saldo <- DonoContaEm[j].Saldo+valor
+				  fimse
+				fimse
+			fimpara
+		fimse
+	fimpara	
+	para i de 0 ate ContaAbertaEm-1
+		se NumeroDaContaEnviar=DonoContaEm[i].NumeroDaConta entao
+			para j de 0 ate ContaAbertaEm-1
+				se NumeroDaContaReceber=DonoContaEm[j].NumeroDaConta entao
+			      se valor <= DonoContaEm[i].Saldo entao
+				      DonoContaEm[i].Saldo <- DonoContaEm[i].Saldo-valor				  
+					  DonoContaEm[j].Saldo <- DonoContaEm[j].Saldo+valor
+				  fimse
+				fimse
+			fimpara
+			para j de 0 ate ContaAberta-1
+				se NumeroDaContaReceber=DonoConta[j].NumeroDaConta entao
+			      se valor <= DonoContaEm[i].Saldo entao
+				      DonoContaEm[i].Saldo <- DonoContaEm[i].Saldo-valor				  
+					  DonoConta[j].Saldo <- DonoConta[j].Saldo+valor
+				  fimse
+				fimse
+			fimpara
+		fimse
+	fimpara
+	//retorno
+	retorne verdadeiro
+fimfuncao
+
+funcao real ConsultarSaldo (inteiro NumeroDaConta)
+	//Particular
+	para i de 0 ate ContaAberta-1
+		se NumeroDaConta=DonoConta[i].NumeroDaConta entao
+			l <- DonoConta[i].Saldo
+		fimse
+	fimpara
+	//Empresarial
+	para i de 0 ate ContaAbertaEm-1
+		se NumeroDaConta=DonoContaEm[i].NumeroDaConta entao
+			l <- DonoContaEm[i].Saldo
+		fimse
+	fimpara	
+	//retorno
+	retorne l
+fimfuncao
+
+funcao logico CadastrarClientes(pessoa k)
+    Cliente[ClientesCadastrado].VerificaConta <- 0
+	Cliente[ClientesCadastrado].NumeroDeOrdem <- ClientesCadastrado+1
+	Cliente[ClientesCadastrado].Codigo <- 3*ClientesCadastrado+11001
+	Cliente[ClientesCadastrado].Nome <- k.Nome
+	Cliente[ClientesCadastrado].NumeroDeBilhete <-k. NumeroDeBilhete
+	Cliente[ClientesCadastrado].Telefone <- k.Telefone
+	Cliente[ClientesCadastrado].genero <- k.genero	
+	Cliente[ClientesCadastrado].Nascimento.dia <-k.Nascimento.dia
+	Cliente[ClientesCadastrado].Nascimento.mes <-k.Nascimento.mes	
+	Cliente[ClientesCadastrado].Nascimento.ano <-k.Nascimento.ano
+	ClientesCadastrado <- ClientesCadastrado+1
+	retorne verdadeiro
+fimfuncao
+
+funcao logico CadastrarClientesEm(empresa k)
+	ClienteEm[ClientesCadastradoEm].VerificaConta <- 0
+	ClienteEm[ClientesCadastradoEm].NumeroDeOrdem <- ClientesCadastradoEm+1
+	ClienteEm[ClientesCadastradoEm].Codigo <-5*ClientesCadastradoEm+10000
+	ClienteEm[ClientesCadastradoEm].Nome <- k.Nome
+	ClienteEm[ClientesCadastradoEm].NIF <-k. NIF
+	ClienteEm[ClientesCadastradoEm].Telefone <- k.Telefone
+	ClienteEm[ClientesCadastradoEm].Nascimento.dia <- k.Nascimento.dia	
+	ClienteEm[ClientesCadastradoEm].Nascimento.mes <- k.Nascimento.mes	
+	ClienteEm[ClientesCadastradoEm].Nascimento.ano <- k.Nascimento.ano	
+	ClientesCadastradoEm <- ClientesCadastradoEm+1
+	retorne verdadeiro
+fimfuncao
+
+procedimento ListarClientesParticular()
+	para n de 0 ate ClientesCadastrado-1
+	    mostre "==============================================\n"		
+		mostre "Nº ", Cliente[n].NumeroDeOrdem ,"\n"
+		mostre "Codigo de identificacao: ",Cliente[n].Codigo,"\n"
+	    mostre "Nome: ", Cliente[n].Nome,"\n"
+	    mostre "Genero: ", Cliente[n].genero,"\n"
+	    mostre "Numero do bilhete de identidade: ", Cliente[n].NumeroDeBilhete,"\n"
+	    mostre "Numero de telefone: ",Cliente[n].Telefone,"\n"
+        mostre "Data de nascimento: ",Cliente[n].Nascimento.dia," de ",Cliente[n].Nascimento.mes," de ",Cliente[n].Nascimento.ano,"\n"
+	    mostre "==============================================\n"
+	fimpara		
+fimprocedimento	
+
+procedimento ListarClientesEmpresariais()			 			
+	para n de 0 ate ClientesCadastradoEm-1
+	    mostre "==============================================\n"
+		mostre "Nº ", ClienteEm[n].NumeroDeOrdem, "\n"
+		mostre "Codigo de identificacao: ",ClienteEm[n].Codigo,"\n"
+	    mostre "Nome da empresa: ", ClienteEm[n].Nome,"\n"
+	    mostre "Numero de Identificacao Fiscal: ", ClienteEm[n].NIF,"\n"
+	    mostre "Numero de telefone: ",ClienteEm[n].Telefone,"\n"
+	    mostre "Data de criação da empresa: ",ClienteEm[n].Nascimento.dia," de ",ClienteEm[n].Nascimento.mes," de ",ClienteEm[n].Nascimento.ano,"\n"
+	    mostre "==============================================\n"	
+	fimpara					
+fimprocedimento
+
+procedimento MeusDados(pessoa k)
+    para i de 0 ate ClientesCadastrado-1
+    	se k.codigo = Cliente[i].Codigo entao
+		    mostre "==============================================\n"		
+			mostre "Nº ", Cliente[i].NumeroDeOrdem ,"\n"
+			mostre "Codigo de identificacao: ",Cliente[i].Codigo,"\n"
+		    mostre "Nome: ", Cliente[i].Nome,"\n"
+		    mostre "Genero: ", Cliente[i].genero,"\n"
+		    mostre "Numero do bilhete de identidade: ", Cliente[i].NumeroDeBilhete,"\n"
+		    mostre "Numero de telefone: ",Cliente[i].Telefone,"\n"
+	        mostre "Data de nascimento: ",Cliente[i].Nascimento.dia," de ",Cliente[i].Nascimento.mes," de ",Cliente[i].Nascimento.ano,"\n"
+		    mostre "==============================================\n"
+    	fimse
+    fimpara
+	para i de 0 ate ContaAberta - 1
+		se k.codigo=DonoConta[i].Codigo entao
+			mostre "Codigo da conta: ",DonoConta[i].Codigo,"\n"
+			mostre "Numero da conta: ",DonoConta[i].NumeroDaConta,"\n"
+			mostre "Saldo da conta: ",DonoConta[i].Saldo,"\n"
+			mostre "===========================================\n"
+			mostre "Estes sao os seus dados !\n\n"
+		fimse
+    fimpara
+fimprocedimento
+
+procedimento MeusDadosEm(empresa k)
+    para i de 0 ate ClientesCadastradoEm-1
+    	se k.codigo = ClienteEm[i].Codigo entao
+		    mostre "==============================================\n"
+			mostre "Nº ", ClienteEm[i].NumeroDeOrdem, "\n"
+			mostre "Codigo de identificacao: ",ClienteEm[i].Codigo,"\n"
+		    mostre "Nome da empresa: ", ClienteEm[i].Nome,"\n"
+		    mostre "Numero de Identificacao Fiscal: ", ClienteEm[i].NIF,"\n"
+		    mostre "Numero de telefone: ",ClienteEm[i].Telefone,"\n"
+		    mostre "Data de criação da empresa: ",ClienteEm[i].Nascimento.dia," de ",ClienteEm[i].Nascimento.mes," de ",ClienteEm[i].Nascimento.ano,"\n"
+		    mostre "==============================================\n"
+    	fimse
+    fimpara
+	para i de 0 ate ContaAbertaEm - 1
+		se k.codigo=DonoContaEm[i].Codigo entao
+			mostre "Codigo da conta: ",DonoContaEm[i].Codigo,"\n"
+			mostre "Numero da conta: ",DonoContaEm[i].NumeroDaConta,"\n"
+			mostre "Saldo da conta: ",DonoContaEm[i].Saldo,"\n"
+			mostre "===========================================\n"
+			mostre "Estes sao os seus dados !\n\n"
+		fimse
+    fimpara 
+fimprocedimento
+	
+inicio
+	
+	literal quero
+	inteiro opcaoConta,tipodeconta,opcao
+	pessoa t
+	empresa v
+
+    quero<-"S"
+	Enquanto quero="S" faca
+		Mostre"================MENU================ \n"
+		Mostre" Escolha a operacao que deseja: \n"
+		Mostre" [01] Cadastrar cliente \n"
+		Mostre" [02] Abertura de conta \n"
+		Mostre" [03] Depositar dinheiro \n"
+		Mostre" [04] Levantar dinheiro \n"
+		Mostre" [05] Consultar saldo \n"
+		Mostre" [06] Transferir dinheiro \n"
+		Mostre" [07] Atualizar dados do cliente \n"
+		Mostre" [08] Listar clientes \n"
+		Mostre" [09] Copia de segurança\n"
+		Mostre" [10] Restaurar copia de segurança \n"
+		Mostre" [11] Dados do cliente \n"
+		Mostre" [12] Terminar \n"
+		Leia opcao
+		Escolha opcao
+			caso 1:
+				limpatela
+				quero<-"S"
+				enquanto quero="S" faca
+					mostre "Escolha o tipo de conta que pretende criar: \n"
+					mostre "[0] Conta particular \n"
+					mostre "[1] Conta empresarial \n"
+					mostre "[2] Sair \n"
+					leia tipodeconta
+					escolha tipodeconta
+						caso 0:
+						    limpatela
+							enquanto quero="S" faca
+							    mostre "Conta particular \n"								
+								mostre "Insira o seu nome: \n"
+								leia t.Nome 
+								limpatela
+								enquanto quero="S" faca
+									mostre "Escolha o genero: \n"
+									mostre " [1] Masculino \n"
+									mostre " [2] Feminino \n"
+									leia opcao
+							        escolha opcao
+							        caso 1:
+							        	t.genero <-"Masculino"
+							        	quero <-"N"
+							        caso 2:
+							        	t.genero <-"Feminino"
+							        	quero <- "N"
+							        defeito:
+										limpatela
+										mostre "Essa possibilidade não existe\n"
+										quero <-"S"
+									fimescolha
+								fimenquanto
+								limpatela
+								mostre "Insira o seu numero do bilhete de identidade: \n"
+								leia t.NumeroDeBilhete							
+								limpatela
+								quero <-"S"
+								enquanto quero="S" faca
+									mostre "Insira o seu número de telefone: \n"
+									leia t.Telefone
+									se t.Telefone <= 999999999 e t.Telefone >= 900000000 entao
+										t.Telefone <- t.Telefone
+										quero <-"N"
+									senao
+										limpatela
+										mostre "O número de telefone inserido não existe !\n\n"
+										quero <-"S"
+									fimse
+								fimenquanto
+								limpatela 
+															
+							    quero<-"S"
+								enquanto quero="S" faca
+									mostre "Insira o seu dia de nascimento: "
+									leia t.Nascimento.dia
+									limpatela
+									se t.Nascimento.dia >=01 e t.Nascimento.dia <=31 entao
+										se t.Nascimento.dia >=01 e t.Nascimento.dia <=29 entao
+												t.Nascimento.dia <- t.Nascimento.dia
+												enquanto quero="S" faca
+												mostre "Dia: ",t.Nascimento.dia,"\n"
+												mostre "Escolha o seu mes:\n"
+												mostre " [01] Janeiro\n"
+												mostre " [02] Fevereiro\n"
+												mostre " [03] Março\n"
+												mostre " [04] Abril\n"
+												mostre " [05] Maio\n"
+												mostre " [06] Junho\n"
+												mostre " [07] Julho\n"
+												mostre " [08] Agosto\n"
+												mostre " [09] Setembro\n"
+												mostre " [10] Outubro\n"
+												mostre " [11] Novembro\n"
+												mostre " [12] Dezembro\n"
+												leia opcao
+											escolha opcao
+											  caso 1:
+												t.Nascimento.mes <- "Janeiro"
+												quero <-"N"
+											  caso 2:
+												t.Nascimento.mes <- "Fevereiro"
+												quero <-"N"
+											  caso 3:
+												t.Nascimento.mes <- "Março"
+												quero <-"N"
+											  caso 4:
+												t.Nascimento.mes <- "Abril"
+												quero <-"N"
+											  caso 5:
+												t.Nascimento.mes <- "Maio"
+												quero <-"N"
+											  caso 6:
+												t.Nascimento.mes <- "Junho"
+												quero <-"N"
+											  caso 7:
+												t.Nascimento.mes <- "Julho"
+												quero <-"N"
+											  caso 8:
+												t.Nascimento.mes <- "Agosto"
+												quero <-"N"
+											  caso 9:
+											    t.Nascimento.mes <- "Setembro"
+											    quero <-"N"
+											  caso 10:
+												t.Nascimento.mes <- "Outubro"
+												quero <-"N"
+											  caso 11:
+												t.Nascimento.mes <- "Novembro"
+												quero <-"N"
+											  caso 12:
+												t.Nascimento.mes <- "Dezembro"
+												quero <-"N"
+											  defeito:
+											    limpatela
+											    mostre"Essa possibilidade nao existe\n\n"
+												quero <-"S"
+											fimescolha
+											Fimenquanto
+									    Fimse
+										se t.Nascimento.dia=30 entao
+											t.Nascimento.dia <- t.Nascimento.dia
+											    enquanto quero="S" faca
+												mostre "Dia: ",t.Nascimento.dia,"\n"
+												mostre "Escolha o seu mes:\n"
+												mostre " [01] Janeiro\n"
+												mostre " [03] Março\n"
+												mostre " [04] Abril\n"
+												mostre " [05] Maio\n"
+												mostre " [06] Junho\n"
+												mostre " [07] Julho\n"
+												mostre " [08] Agosto\n"
+												mostre " [09] Setembro\n"
+												mostre " [10] Outubro\n"
+												mostre " [11] Novembro\n"
+												mostre " [12] Dezembro\n"
+												leia opcao
+											escolha opcao
+											  caso 1:
+												t.Nascimento.mes <- "Janeiro" 
+												quero <-"N"
+											  caso 3:
+												t.Nascimento.mes <- "Março"
+												quero <-"N"
+											  caso 4:
+												t.Nascimento.mes <- "Abril"
+												quero <-"N"
+											  caso 5:
+												t.Nascimento.mes <- "Maio"
+												quero <-"N"
+											  caso 6:
+												t.Nascimento.mes <- "Junho"
+												quero <-"N"
+											  caso 7:
+												t.Nascimento.mes <- "Julho"
+												quero <-"N"
+											  caso 8:
+												t.Nascimento.mes <- "Agosto"
+												quero <-"N"
+											  caso 9:
+											    t.Nascimento.mes <- "Setembro"
+											    quero <-"N"
+											  caso 10:
+												t.Nascimento.mes <- "Outubro"
+												quero <-"N"
+											  caso 11:
+												t.Nascimento.mes <- "Novembro"
+												quero <-"N"
+											  caso 12:
+												t.Nascimento.mes <- "Dezembro"
+												quero <-"N"
+											  defeito:
+											    limpatela
+											    mostre"Essa possibilidade nao existe\n\n"
+												quero <-"S"
+											fimescolha
+											Fimenquanto
+											Fimse
+							                se t.Nascimento.dia=31 entao
+							                	t.Nascimento.dia <- t.Nascimento.dia
+												enquanto quero="S" faca
+												mostre "Dia: ",t.Nascimento.dia,"\n"
+												mostre "Escolha o seu mes:\n"
+												mostre " [01] Janeiro\n"
+												mostre " [03] Março\n"
+												mostre " [05] Maio\n"
+												mostre " [07] Julho\n"
+												mostre " [08] Agosto\n"
+												mostre " [10] Outubro\n"
+												mostre " [12] Dezembro\n"
+												leia opcao
+											escolha opcao
+											  caso 1:
+												t.Nascimento.mes <- "Janeiro"
+												quero <-"N"
+											  caso 3:
+												t.Nascimento.mes <- "Março"
+												quero <-"N"
+											  caso 5:
+												t.Nascimento.mes <- "Maio"
+												quero <-"N"
+											  caso 7:
+												t.Nascimento.mes <- "Julho"
+												quero <-"N"
+											  caso 8:
+												t.Nascimento.mes <- "Agosto"
+												quero <-"N"
+											  caso 10:
+												t.Nascimento.mes <- "Outubro"
+												quero <-"N"
+											  caso 12:
+												t.Nascimento.mes <- "Dezembro"
+												quero <-"N"
+											  defeito:
+											    limpatela
+											    mostre"Essa possibilidade nao existe\n\n"
+												quero <-"S"
+											fimescolha
+											Fimenquanto
+											Fimse
+									quero<-"N"
+									senao
+										mostre"Esse dia nao existe\n\n"
+										quero<-"S"		
+									Fimse
+								    fimenquanto
+								    limpatela
+								    quero<-"S"
+								    enquanto quero="S" faca
+									  mostre"Dia: ",t.Nascimento.dia,"\n"
+								      mostre"Mês: ",t.Nascimento.mes,"\n"
+                                      mostre "Insira o seu ano de nascimento: "
+								      leia t.Nascimento.ano
+									  limpatela
+									  se t.Nascimento.ano >=1900 e t.Nascimento.ano <=2024 entao
+										t.Nascimento.ano <- t.Nascimento.ano
+										quero <-"N"
+									  senao
+										quero <-"S"
+										mostre"Nâo e possivel registar este ano\n\n"
+									  fimse
+								    fimenquanto
+								 
+								CadastrarClientes(t)
+								
+								limpatela
+								mostre "Pretende fazer mais cadastros para contas do tipo particular ?! [S]/[N]"		
+								leia quero
+								limpatela
+							fimenquanto
+							quero<-"S"
+						caso 1:
+							limpatela
+							enquanto quero="S" faca
+							mostre "Conta empresarial \n"
+								mostre "Insira o nome da empresa: \n"
+								leia v.Nome 
+								limpatela
+								mostre "Insira o Numero de Identificacao Fiscal(NIF) da empresa:\n"
+								leia v.NIF 
+								limpatela
+								quero <-"S"
+								enquanto quero="S" faca
+									mostre "Insira o número de telefone da empresa: \n"
+									leia v.Telefone
+									se v.Telefone <= 999999999 e v.Telefone >= 900000000 entao
+										v.Telefone <- v.Telefone
+										quero <-"N"
+									senao
+										limpatela
+										mostre "O número de telefone inserido não existe !\n\n"
+										quero <-"S"
+									fimse
+								fimenquanto
+								limpatela 
+
+								quero<-"S"
+								enquanto quero="S" faca
+									mostre "Insira o dia de criação da empresa: "
+									leia v.Nascimento.dia
+									limpatela
+									se v.Nascimento.dia >=01 e v.Nascimento.dia <=31 entao
+										se v.Nascimento.dia >=01 e v.Nascimento.dia <=29 entao
+												v.Nascimento.dia <- v.Nascimento.dia
+												enquanto quero="S" faca
+												mostre "Dia: ",v.Nascimento.dia,"\n"
+												mostre "Escolha o seu mes:\n"
+												mostre " [01] Janeiro\n"
+												mostre " [02] Fevereiro\n"
+												mostre " [03] Março\n"
+												mostre " [04] Abril\n"
+												mostre " [05] Maio\n"
+												mostre " [06] Junho\n"
+												mostre " [07] Julho\n"
+												mostre " [08] Agosto\n"
+												mostre " [09] Setembro\n"
+												mostre " [10] Outubro\n"
+												mostre " [11] Novembro\n"
+												mostre " [12] Dezembro\n"
+												leia opcao
+											escolha opcao
+											  caso 1:
+												v.Nascimento.mes <- "Janeiro"
+												quero <-"N"
+											  caso 2:
+												v.Nascimento.mes <- "Fevereiro"
+												quero <-"N"
+											  caso 3:
+												v.Nascimento.mes <- "Março"
+												quero <-"N"
+											  caso 4:
+												v.Nascimento.mes <- "Abril"
+												quero <-"N"
+											  caso 5:
+												v.Nascimento.mes <- "Maio"
+												quero <-"N"
+											  caso 6:
+												v.Nascimento.mes <- "Junho"
+												quero <-"N"
+											  caso 7:
+												v.Nascimento.mes <- "Julho"
+												quero <-"N"
+											  caso 8:
+												v.Nascimento.mes <- "Agosto"
+												quero <-"N"
+											  caso 9:
+											    v.Nascimento.mes <- "Setembro"
+											    quero <-"N"
+											  caso 10:
+												v.Nascimento.mes <- "Outubro"
+												quero <-"N"
+											  caso 11:
+												v.Nascimento.mes <- "Novembro"
+												quero <-"N"
+											  caso 12:
+												v.Nascimento.mes <- "Dezembro"
+												quero <-"N"
+											  defeito:
+											    limpatela
+											    mostre"Essa possibilidade nao existe\n\n"
+												quero <-"S"
+											fimescolha
+											Fimenquanto
+									    Fimse
+										se v.Nascimento.dia=30 entao
+											v.Nascimento.dia <- v.Nascimento.dia
+											    enquanto quero="S" faca
+												mostre "Dia: ",v.Nascimento.dia,"\n"
+												mostre "Escolha o seu mes:\n"
+												mostre " [01] Janeiro\n"
+												mostre " [03] Março\n"
+												mostre " [04] Abril\n"
+												mostre " [05] Maio\n"
+												mostre " [06] Junho\n"
+												mostre " [07] Julho\n"
+												mostre " [08] Agosto\n"
+												mostre " [09] Setembro\n"
+												mostre " [10] Outubro\n"
+												mostre " [11] Novembro\n"
+												mostre " [12] Dezembro\n"
+												leia opcao
+											escolha opcao
+											  caso 1:
+												v.Nascimento.mes <- "Janeiro" 
+												quero <-"N"
+											  caso 3:
+												v.Nascimento.mes <- "Março"
+												quero <-"N"
+											  caso 4:
+												v.Nascimento.mes <- "Abril"
+												quero <-"N"
+											  caso 5:
+												v.Nascimento.mes <- "Maio"
+												quero <-"N"
+											  caso 6:
+												v.Nascimento.mes <- "Junho"
+												quero <-"N"
+											  caso 7:
+												v.Nascimento.mes <- "Julho"
+												quero <-"N"
+											  caso 8:
+												v.Nascimento.mes <- "Agosto"
+												quero <-"N"
+											  caso 9:
+											    v.Nascimento.mes <- "Setembro"
+											    quero <-"N"
+											  caso 10:
+												v.Nascimento.mes <- "Outubro"
+												quero <-"N"
+											  caso 11:
+												v.Nascimento.mes <- "Novembro"
+												quero <-"N"
+											  caso 12:
+												v.Nascimento.mes <- "Dezembro"
+												quero <-"N"
+											  defeito:
+											    limpatela
+											    mostre"Essa possibilidade nao existe\n\n"
+												quero <-"S"
+											fimescolha
+											Fimenquanto
+											Fimse
+							                se v.Nascimento.dia=31 entao
+							                	v.Nascimento.dia <- v.Nascimento.dia
+												enquanto quero="S" faca
+												mostre "Dia: ",v.Nascimento.dia,"\n"
+												mostre "Escolha o seu mes:\n"
+												mostre " [01] Janeiro\n"
+												mostre " [03] Março\n"
+												mostre " [05] Maio\n"
+												mostre " [07] Julho\n"
+												mostre " [08] Agosto\n"
+												mostre " [10] Outubro\n"
+												mostre " [12] Dezembro\n"
+												leia opcao
+											escolha opcao
+											  caso 1:
+												v.Nascimento.mes <- "Janeiro"
+												quero <-"N"
+											  caso 3:
+												v.Nascimento.mes <- "Março"
+												quero <-"N"
+											  caso 5:
+												v.Nascimento.mes <- "Maio"
+												quero <-"N"
+											  caso 7:
+												v.Nascimento.mes <- "Julho"
+												quero <-"N"
+											  caso 8:
+												v.Nascimento.mes <- "Agosto"
+												quero <-"N"
+											  caso 10:
+												v.Nascimento.mes <- "Outubro"
+												quero <-"N"
+											  caso 12:
+												v.Nascimento.mes <- "Dezembro"
+												quero <-"N"
+											  defeito:
+											    limpatela
+											    mostre"Essa possibilidade nao existe\n\n"
+												quero <-"S"
+											fimescolha
+											Fimenquanto
+											Fimse
+									quero<-"N"
+									senao
+										mostre"Esse dia nao existe\n\n"
+										quero<-"S"
+									Fimse
+								    fimenquanto
+								    limpatela
+								    quero<-"S"
+								    enquanto quero="S" faca
+									  mostre"Dia: ",v.Nascimento.dia,"\n"
+								      mostre"Mês: ",v.Nascimento.mes,"\n"
+                                      mostre "Insira o ano de criação da empresa: "
+								      leia v.Nascimento.ano
+									  limpatela
+									  se v.Nascimento.ano >=1900 e v.Nascimento.ano <=2024 entao
+										v.Nascimento.ano <- v.Nascimento.ano
+										quero <-"N"
+									  senao
+										quero <-"S"
+										mostre"Nâo e possivel registar este ano\n\n"
+									  fimse
+								    fimenquanto
+
+								CadastrarClientesEm(v)
+								
+								limpatela
+								mostre "Pretende fazer mais cadastros para contas do tipo empresarial ?! [S]/[N]"		
+								leia quero
+								limpatela
+							  fimenquanto
+							quero<-"S"
+						defeito:
+						    limpatela
+							quero<-"N"
+					fimescolha
+				fimenquanto
+				quero<-"S"		
+			caso 2:
+			   limpatela
+			    limpatela
+				enquanto quero="S" faca
+					enquanto quero="S" faca
+						mostre "Escolha o tipo de conta: \n"
+						mostre " [0] Conta particular \n"
+						mostre " [1] Conta empresarial \n"
+						leia tipodeconta
+				        limpatela
+				        escolha tipodeconta
+				        caso 0:
+				        	tipodeconta <- 0
+						   	mostre "insira o codigo do cliente :"
+				            leia codigo
+						    para n de 0 ate ClientesCadastrado-1
+						    	se codigo = Cliente[n].Codigo entao
+								    mostre "==============================================\n"		
+									mostre "Nº ", Cliente[n].NumeroDeOrdem ,"\n"
+									mostre "Codigo de identificacao: ",Cliente[n].Codigo,"\n"
+								    mostre "Nome: ", Cliente[n].Nome,"\n"
+								    mostre "Genero: ", Cliente[n].genero,"\n"
+								    mostre "Numero do bilhete de identidade: ", Cliente[n].NumeroDeBilhete,"\n"
+								    mostre "Numero de telefone: ",Cliente[n].Telefone,"\n"
+							        mostre "Data de nascimento: ",Cliente[n].Nascimento.dia," de ",Cliente[n].Nascimento.mes," de ",Cliente[n].Nascimento.ano,"\n"
+								    mostre "==============================================\n"	
+							        se Cliente[n].VerificaConta=0 entao
+								        AberturaDeConta(Cliente[n],tipodeconta)
+										para n de 0 ate ContaAberta - 1
+											se codigo=DonoConta[n].Codigo entao
+												mostre "Codigo da conta: ",DonoConta[n].Codigo,"\n"
+												mostre "Numero da conta: ",DonoConta[n].NumeroDaConta,"\n"
+												mostre "Saldo da conta: ",DonoConta[n].Saldo,"\n"
+												mostre "===========================================\n"
+												mostre "Conta criada com secesso !\n\n"
+											fimse
+										fimpara
+									senao
+									  mostre "                                   \n"
+									  mostre "Este cliente ja possui uma conta !\n"
+									fimse					
+						    	fimse
+						    fimpara	
+				        	quero <-"N"
+				        caso 1:
+				        	tipodeconta <- 1
+						    mostre "insira o codigo do cliente :"
+				            leia codigo
+						    para n de 0 ate ClientesCadastradoEm-1
+						    	se codigo = ClienteEm[n].Codigo entao
+								    mostre "==============================================\n"
+									mostre "Nº ", ClienteEm[n].NumeroDeOrdem, "\n"
+									mostre "Codigo de identificacao: ",ClienteEm[n].Codigo,"\n"
+								    mostre "Nome da empresa: ", ClienteEm[n].Nome,"\n"
+								    mostre "Numero de Identificacao Fiscal: ", ClienteEm[n].NIF,"\n"
+								    mostre "Numero de telefone: ",ClienteEm[n].Telefone,"\n"
+								    mostre "Data de criação da empresa: ",ClienteEm[n].Nascimento.dia," de ",ClienteEm[n].Nascimento.mes," de ",ClienteEm[n].Nascimento.ano,"\n"
+								    mostre "==============================================\n"	
+									se ClienteEm[n].VerificaConta=0 entao
+									    AberturaDeContaEm (ClienteEm[n],tipodeconta)
+										para n de 0 ate ContaAbertaEm-1
+											se codigo=DonoContaEm[n].Codigo entao
+												mostre "Codigo da conta: ",DonoContaEm[n].Codigo,"\n"
+												mostre "Numero da conta: ",DonoContaEm[n].NumeroDaConta,"\n"
+												mostre "Saldo da conta: ",DonoContaEm[n].Saldo,"\n"
+												mostre "===========================================\n"
+												mostre "Conta criada com sucesso !\n\n"
+											fimse
+										fimpara
+									senao
+									  mostre "                                   \n"
+									  mostre "Este cliente ja possui uma conta !\n"
+									fimse							
+						    	fimse
+						    fimpara    	
+				        	quero <- "N"
+				        defeito:
+							limpatela
+							mostre "Essa possibilidade não existe\n\n"
+							quero <-"S"
+						fimescolha
+					fimenquanto	
+					quero<-"S"	    
+			        mostre "                                       \n"
+				    mostre "Deseja abrir mais uma conta ?! [S]/[N] \n"
+				    leia quero
+				    limpatela
+				fimenquanto
+				quero<-"S"					
+			caso 3:
+			    limpatela
+				enquanto quero="S" faca
+				    mostre "Insira o numero da Conta: "
+					leia NumeroDaConta
+					para n de 0 ate ContaAberta-1 
+					  se NumeroDaConta=DonoConta[n].NumeroDaConta entao
+						  mostre "Insira o valor a depositar: "
+						  leia valor
+					      DepositarDinheiro(NumeroDaConta,valor)  
+					  fimse
+					fimpara
+					para n de 0 ate ContaAbertaEm-1 
+					  se NumeroDaConta=DonoContaEm[n].NumeroDaConta entao
+						  mostre "Insira o valor a depositar: "
+						  leia valor
+					      DepositarDinheiro(NumeroDaConta,valor)  
+					  fimse
+					fimpara	  
+				    mostre "                                     \n"
+				    mostre "Deseja depositar mais ?! [S]/[N] \n"
+				    leia quero
+				    limpatela
+				fimenquanto
+				quero<-"S"		
+			caso 4:
+			    limpatela
+				enquanto quero="S" faca
+					mostre "Insira o numero da Conta: "
+					leia NumeroDaConta
+					para n de 0 ate ContaAberta-1 
+					  se NumeroDaConta=DonoConta[n].NumeroDaConta entao
+						  mostre "Insira o valor a levantar: "
+						  leia valor
+					      LevantarDinheiro(NumeroDaConta,valor)  
+					  fimse
+					fimpara
+					para n de 0 ate ContaAbertaEm-1 
+					  se NumeroDaConta=DonoContaEm[n].NumeroDaConta entao
+						  mostre "Insira o valor a levantar: "
+						  leia valor
+					      LevantarDinheiro(NumeroDaConta,valor)  
+					  fimse
+					fimpara	  
+				    mostre "                                   \n"
+				    mostre "Deseja levantar mais ?! [S]/[N] \n"
+				    leia quero
+				    limpatela
+				fimenquanto
+				quero<-"S"		
+			caso 5:
+			    limpatela
+				enquanto quero="S" faca
+					mostre "Insira o numero da Conta: "
+					leia NumeroDaConta
+					para n de 0 ate ContaAberta-1 
+					  se NumeroDaConta=DonoConta[n].NumeroDaConta entao
+						  mostre "Saldo da conta: "
+						  mostre ConsultarSaldo (DonoConta[n].NumeroDaConta) ,"\n\n"   
+					  fimse
+					fimpara
+					para n de 0 ate ContaAbertaEm-1 
+					  se NumeroDaConta=DonoContaEm[n].NumeroDaConta entao
+						  mostre "Saldo da conta: "
+						  mostre ConsultarSaldo (DonoContaEm[n].NumeroDaConta) ,"\n\n"   
+					  fimse
+					fimpara
+				    mostre "Deseja consultar mais ?! [S]/[N] \n"
+				    leia quero
+				    limpatela
+				fimenquanto
+				quero<-"S"	
+			caso 6:	
+				limpatela
+				enquanto quero="S" faca
+					mostre "Insira o numero da sua Conta: "
+					leia NumeroDaConta
+					para x de 0 ate ContaAberta-1
+						se NumeroDaConta=DonoConta[x].NumeroDaConta entao
+							mostre "Insira o numero da conta que pretende enviar :"
+					        leia NumeroDaConta2
+							para z de 0 ate ContaAberta-1
+								se NumeroDaConta2=DonoConta[z].NumeroDaConta entao
+									mostre "Insira o valor a enviar: "
+									leia valor 
+									TransferirDinheiro(NumeroDaConta,NumeroDaConta2,valor)
+								fimse
+							fimpara
+							para z de 0 ate ContaAbertaEm-1
+								se NumeroDaConta2=DonoContaEm[z].NumeroDaConta entao
+									mostre "Insira o valor a enviar: "
+									leia valor
+									TransferirDinheiro(NumeroDaConta,NumeroDaConta2,valor)
+								fimse
+							fimpara			
+						fimse
+					fimpara
+					para x de 0 ate ContaAbertaEm-1
+						se NumeroDaConta=DonoContaEm[x].NumeroDaConta entao
+							mostre "Insira o numero da conta que pretende enviar :"
+					        leia NumeroDaConta2
+							para z de 0 ate ContaAbertaEm-1
+								se NumeroDaConta2=DonoContaEm[z].NumeroDaConta entao
+									mostre "Insira o valor a enviar: "
+									leia valor
+									TransferirDinheiro(NumeroDaConta,NumeroDaConta2,valor)
+								fimse
+							fimpara
+							para z de 0 ate ContaAberta-1
+								se NumeroDaConta2=DonoConta[z].NumeroDaConta entao
+									mostre "Insira o valor a enviar: "
+									leia valor
+									TransferirDinheiro(NumeroDaConta,NumeroDaConta2,valor)
+								fimse
+							fimpara
+						fimse
+					fimpara
+				    mostre "                                   \n"
+				    mostre "Deseja transferir mais ?! [S]/[N] \n"
+				    leia quero
+				    limpatela
+				fimenquanto
+				quero<-"S"
+			caso 7:
+				limpatela
+				enquanto quero="S" faca
+				mostre "Escolha o tipo de conta que deseja atualizar\n"
+				mostre " [0] Contas particulares\n"
+				mostre " [1] Contas empresariais\n"
+				mostre " [2] Sair\n"
+				leia tipodeconta
+				Escolha tipodeconta
+                   caso 0:
+							limpatela
+								enquanto quero="S" faca	
+									mostre"Digite o nome do cliente que deseja atualizar:\n"
+									leia NomeProcurado
+							        limpatela
+									Procurados <- 0
+									para n de 0 ate ClientesCadastrado-1
+										se Cliente[n].Nome = NomeProcurado entao
+								            mostre "==============================================\n"
+											mostre "Nº ", Cliente[n].NumeroDeOrdem ,"\n"
+											mostre "Codigo de identificacao: ",Cliente[n].Codigo,"\n"
+										    mostre "Nome: ", Cliente[n].Nome,"\n"
+										    mostre "Genero: ", Cliente[n].genero,"\n"
+										    mostre "Numero do bilhete de identidade: ", Cliente[n].NumeroDeBilhete,"\n"
+										    mostre "Numero de telefone: ",Cliente[n].Telefone,"\n"
+									        mostre "Data de nascimento: ",Cliente[n].Nascimento.dia," de ",Cliente[n].Nascimento.mes," de ",Cliente[n].Nascimento.ano,"\n"
+										    mostre "==============================================\n\n"
+								            Procurados <- Procurados+1
+								        fimse
+									fimpara
+			
+										se Procurados > 1 entao	
+											
+												mostre"Digite o numero de ordem do cliente que deseja atualizar:\n"
+											    leia NumeroProcurado	
+												limpatela
+												para n de 0 ate ClientesCadastrado-1
+												se Cliente[n].NumeroDeOrdem = NumeroProcurado entao											   
+												    mostre "==============================================\n"
+													mostre "Nº ", Cliente[n].NumeroDeOrdem ,"\n"
+													mostre "Codigo de identificacao: ",Cliente[n].Codigo,"\n"
+												    mostre "Nome: ", Cliente[n].Nome,"\n"
+												    mostre "Genero: ", Cliente[n].genero,"\n"
+												    mostre "Numero do bilhete de identidade: ", Cliente[n].NumeroDeBilhete,"\n"
+												    mostre "Numero de telefone: ",Cliente[n].Telefone,"\n"
+											        mostre "Data de nascimento: ",Cliente[n].Nascimento.dia," de ",Cliente[n].Nascimento.mes," de ",Cliente[n].Nascimento.ano,"\n"
+												    mostre "==============================================\n\n"
+													mostre "O que deseja atualizar:\n"
+													mostre " [1] Nome: \n"
+													mostre " [2] Genero: \n"
+													mostre " [3] Numero do bilhete de identidade: \n"
+													mostre " [4] Numero de telefone: \n"
+													mostre " [5] Data de nascimento: \n"
+													mostre " [6] Sair\n"
+													leia opcao
+													escolha opcao
+													    caso 1:	
+												           limpatela
+															q <- Cliente[n].Nome
+														    mostre "Nome antigo: ",q,"\n" 
+															mostre "Escreva o novo nome: "
+															leia Cliente[n].Nome
+														caso 2:
+												          limpatela
+												          quero<-"S"
+												          enquanto quero="S" faca
+																mostre "Escolha o genero: \n"
+																mostre " [1] Masculino \n"
+																mostre " [2] Feminino \n"
+																leia opcao
+														        escolha opcao
+														        caso 1:
+														        	Cliente[n].genero <-"Masculino"
+														        	quero <-"N"
+														        caso 2:
+														        	Cliente[n].genero <-"Feminino"
+														        	quero <- "N"
+														        defeito:
+																	limpatela
+																	mostre "Essa possibilidade não existe\n"
+																	quero <-"S"
+																fimescolha
+															fimenquanto			
+														caso 3:
+												           limpatela
+															p <- Cliente[n].NumeroDeBilhete
+														    mostre "Numero do bilhete antigo: ",p,"\n" 
+															mostre "Escreva o novo numero de bilhete: "
+															leia Cliente[n].NumeroDeBilhete	
+														caso 4:
+												           limpatela
+												           quero <-"S"
+															p <- Cliente[n].Telefone
+															enquanto quero="S" faca
+															    mostre "Antigo numero de telefone: ",p,"\n" 
+																mostre "Insira o novo número de telefone : "
+																leia Cliente[n].Telefone
+																se Cliente[n].Telefone <= 999999999 e Cliente[n].Telefone >= 900000000 entao
+																	Cliente[n].Telefone <- Cliente[n].Telefone
+																	quero <-"N"
+																senao
+																	limpatela
+																	mostre "O número de telefone inserido não existe !\n\n"
+																	quero <-"S"
+																fimse
+															fimenquanto
+														caso 5:
+												            limpatela
+												            quero<-"S"
+															enquanto quero="S" faca
+																mostre "Insira o dia de nascimento: "
+																leia Cliente[n].Nascimento.dia
+																limpatela
+																se Cliente[n].Nascimento.dia >=01 e Cliente[n].Nascimento.dia <=31 entao
+																	se Cliente[n].Nascimento.dia >=01 e Cliente[n].Nascimento.dia <=29 entao
+																			Cliente[n].Nascimento.dia <- Cliente[n].Nascimento.dia
+																			enquanto quero="S" faca
+																			mostre "Dia: ",Cliente[n].Nascimento.dia,"\n"
+																			mostre "Escolha o seu mes:\n"
+																			mostre " [01] Janeiro\n"
+																			mostre " [02] Fevereiro\n"
+																			mostre " [03] Março\n"
+																			mostre " [04] Abril\n"
+																			mostre " [05] Maio\n"
+																			mostre " [06] Junho\n"
+																			mostre " [07] Julho\n"
+																			mostre " [08] Agosto\n"
+																			mostre " [09] Setembro\n"
+																			mostre " [10] Outubro\n"
+																			mostre " [11] Novembro\n"
+																			mostre " [12] Dezembro\n"
+																			leia opcao
+																		escolha opcao
+																		  caso 1:
+																			Cliente[n].Nascimento.mes <- "Janeiro"
+																			quero <-"N"
+																		  caso 2:
+																			Cliente[n].Nascimento.mes <- "Fevereiro"
+																			quero <-"N"
+																		  caso 3:
+																			Cliente[n].Nascimento.mes <- "Março"
+																			quero <-"N"
+																		  caso 4:
+																			Cliente[n].Nascimento.mes <- "Abril"
+																			quero <-"N"
+																		  caso 5:
+																			Cliente[n].Nascimento.mes <- "Maio"
+																			quero <-"N"
+																		  caso 6:
+																			Cliente[n].Nascimento.mes <- "Junho"
+																			quero <-"N"
+																		  caso 7:
+																			Cliente[n].Nascimento.mes <- "Julho"
+																			quero <-"N"
+																		  caso 8:
+																			Cliente[n].Nascimento.mes <- "Agosto"
+																			quero <-"N"
+																		  caso 9:
+																		    Cliente[n].Nascimento.mes <- "Setembro"
+																		    quero <-"N"
+																		  caso 10:
+																			Cliente[n].Nascimento.mes <- "Outubro"
+																			quero <-"N"
+																		  caso 11:
+																			Cliente[n].Nascimento.mes <- "Novembro"
+																			quero <-"N"
+																		  caso 12:
+																			Cliente[n].Nascimento.mes <- "Dezembro"
+																			quero <-"N"
+																		  defeito:
+																		    limpatela
+																		    mostre"Essa possibilidade nao existe\n\n"
+																			quero <-"S"
+																		fimescolha
+																		Fimenquanto
+																    Fimse
+																	se Cliente[n].Nascimento.dia=30 entao
+																		Cliente[n].Nascimento.dia <- Cliente[n].Nascimento.dia
+																		    enquanto quero="S" faca
+																			mostre "Dia: ",Cliente[n].Nascimento.dia,"\n"
+																			mostre "Escolha o seu mes:\n"
+																			mostre " [01] Janeiro\n"
+																			mostre " [03] Março\n"
+																			mostre " [04] Abril\n"
+																			mostre " [05] Maio\n"
+																			mostre " [06] Junho\n"
+																			mostre " [07] Julho\n"
+																			mostre " [08] Agosto\n"
+																			mostre " [09] Setembro\n"
+																			mostre " [10] Outubro\n"
+																			mostre " [11] Novembro\n"
+																			mostre " [12] Dezembro\n"
+																			leia opcao
+																		escolha opcao
+																		  caso 1:
+																			Cliente[n].Nascimento.mes <- "Janeiro" 
+																			quero <-"N"
+																		  caso 3:
+																			Cliente[n].Nascimento.mes <- "Março"
+																			quero <-"N"
+																		  caso 4:
+																			Cliente[n].Nascimento.mes <- "Abril"
+																			quero <-"N"
+																		  caso 5:
+																			Cliente[n].Nascimento.mes <- "Maio"
+																			quero <-"N"
+																		  caso 6:
+																			Cliente[n].Nascimento.mes <- "Junho"
+																			quero <-"N"
+																		  caso 7:
+																			Cliente[n].Nascimento.mes <- "Julho"
+																			quero <-"N"
+																		  caso 8:
+																			Cliente[n].Nascimento.mes <- "Agosto"
+																			quero <-"N"
+																		  caso 9:
+																		    Cliente[n].Nascimento.mes <- "Setembro"
+																		    quero <-"N"
+																		  caso 10:
+																			Cliente[n].Nascimento.mes <- "Outubro"
+																			quero <-"N"
+																		  caso 11:
+																			Cliente[n].Nascimento.mes <- "Novembro"
+																			quero <-"N"
+																		  caso 12:
+																			Cliente[n].Nascimento.mes <- "Dezembro"
+																			quero <-"N"
+																		  defeito:
+																		    limpatela
+																		    mostre"Essa possibilidade nao existe\n\n"
+																			quero <-"S"
+																		fimescolha
+																		Fimenquanto
+																		Fimse
+														                se Cliente[n].Nascimento.dia=31 entao
+														                	Cliente[n].Nascimento.dia <- Cliente[n].Nascimento.dia
+																			enquanto quero="S" faca
+																			mostre "Dia: ",Cliente[n].Nascimento.dia,"\n"
+																			mostre "Escolha o seu mes:\n"
+																			mostre " [01] Janeiro\n"
+																			mostre " [03] Março\n"
+																			mostre " [05] Maio\n"
+																			mostre " [07] Julho\n"
+																			mostre " [08] Agosto\n"
+																			mostre " [10] Outubro\n"
+																			mostre " [12] Dezembro\n"
+																			leia opcao
+																		escolha opcao
+																		  caso 1:
+																			Cliente[n].Nascimento.mes <- "Janeiro"
+																			quero <-"N"
+																		  caso 3:
+																			Cliente[n].Nascimento.mes <- "Março"
+																			quero <-"N"
+																		  caso 5:
+																			Cliente[n].Nascimento.mes <- "Maio"
+																			quero <-"N"
+																		  caso 7:
+																			Cliente[n].Nascimento.mes <- "Julho"
+																			quero <-"N"
+																		  caso 8:
+																			Cliente[n].Nascimento.mes <- "Agosto"
+																			quero <-"N"
+																		  caso 10:
+																			Cliente[n].Nascimento.mes <- "Outubro"
+																			quero <-"N"
+																		  caso 12:
+																			Cliente[n].Nascimento.mes <- "Dezembro"
+																			quero <-"N"
+																		  defeito:
+																		    limpatela
+																		    mostre"Essa possibilidade nao existe\n\n"
+																			quero <-"S"
+																		fimescolha
+																		Fimenquanto
+																		Fimse
+																quero<-"N"
+																senao
+																	mostre"Esse dia nao existe\n\n"
+																	quero<-"S"
+																Fimse
+															    fimenquanto
+															    limpatela
+															    quero<-"S"
+															    enquanto quero="S" faca
+																  mostre"Dia: ",Cliente[n].Nascimento.dia,"\n"
+															      mostre"Mês: ",Cliente[n].Nascimento.mes,"\n"
+													              mostre "Insira o ano de nascimento: "
+															      leia Cliente[n].Nascimento.ano
+																  limpatela
+																  se Cliente[n].Nascimento.ano >=1900 e Cliente[n].Nascimento.ano <=2024 entao
+																	Cliente[n].Nascimento.ano <- Cliente[n].Nascimento.ano
+																	quero <-"N"
+																  senao
+																	quero <-"S"
+																	mostre"Nâo e possivel registar este ano\n\n"
+																  fimse
+															    fimenquanto
+														defeito:
+												           limpatela
+													fimescolha
+												fimse
+											fimpara
+								    fimse
+								    
+								    se Procurados = 1 entao								
+										para n de 0 ate ClientesCadastrado-1
+											se Cliente[n].Nome = NomeProcurado entao 
+													mostre "O que deseja atualizar:\n"
+													mostre " [1] Nome: \n"
+													mostre " [2] Genero: \n"
+													mostre " [3] Numero do bilhete de identidade: \n"
+													mostre " [4] Numero de telefone: \n"
+													mostre " [5] Data de nascimento: \n"
+													mostre " [6] Sair\n"
+												leia opcao
+												escolha opcao
+												    caso 1:	
+											           limpatela
+														q <- Cliente[n].Nome
+													    mostre "Nome antigo: ",q,"\n" 
+														mostre "Escreva o novo nome: "
+														leia Cliente[n].Nome
+													caso 2:
+											          limpatela
+											          quero<-"S"
+											          enquanto quero="S" faca
+															mostre "Escolha o genero: \n"
+															mostre " [1] Masculino \n"
+															mostre " [2] Feminino \n"
+															leia opcao
+													        escolha opcao
+													        caso 1:
+													        	Cliente[n].genero <-"Masculino"
+													        	quero <-"N"
+													        caso 2:
+													        	Cliente[n].genero <-"Feminino"
+													        	quero <- "N"
+													        defeito:
+																limpatela
+																mostre "Essa possibilidade não existe\n"
+																quero <-"S"
+															fimescolha
+														fimenquanto													
+													caso 3:
+											           limpatela
+														p <- Cliente[n].NumeroDeBilhete
+													    mostre "Nome antigo: ",p,"\n" 
+														mostre "Escreva o novo nome: "
+														leia Cliente[n].NumeroDeBilhete		
+													caso 4:
+											           limpatela
+											           quero <-"S"
+														p <- Cliente[n].Telefone
+														enquanto quero="S" faca
+														    mostre "Antigo numero de telefone: ",p,"\n" 
+															mostre "Insira o novo número de telefone : "
+															leia Cliente[n].Telefone
+															se Cliente[n].Telefone <= 999999999 e Cliente[n].Telefone >= 900000000 entao
+																Cliente[n].Telefone <- Cliente[n].Telefone
+																quero <-"N"
+															senao
+																limpatela
+																mostre "O número de telefone inserido não existe !\n\n"
+																quero <-"S"
+															fimse
+														fimenquanto
+													caso 5:
+											            limpatela
+											            quero<-"S"
+														enquanto quero="S" faca
+															mostre "Insira o dia de nascimento: "
+															leia Cliente[n].Nascimento.dia
+															limpatela
+															se Cliente[n].Nascimento.dia >=01 e Cliente[n].Nascimento.dia <=31 entao
+																se Cliente[n].Nascimento.dia >=01 e Cliente[n].Nascimento.dia <=29 entao
+																		Cliente[n].Nascimento.dia <- Cliente[n].Nascimento.dia
+																		enquanto quero="S" faca
+																		mostre "Dia: ",Cliente[n].Nascimento.dia,"\n"
+																		mostre "Escolha o seu mes:\n"
+																		mostre " [01] Janeiro\n"
+																		mostre " [02] Fevereiro\n"
+																		mostre " [03] Março\n"
+																		mostre " [04] Abril\n"
+																		mostre " [05] Maio\n"
+																		mostre " [06] Junho\n"
+																		mostre " [07] Julho\n"
+																		mostre " [08] Agosto\n"
+																		mostre " [09] Setembro\n"
+																		mostre " [10] Outubro\n"
+																		mostre " [11] Novembro\n"
+																		mostre " [12] Dezembro\n"
+																		leia opcao
+																	escolha opcao
+																	  caso 1:
+																		Cliente[n].Nascimento.mes <- "Janeiro"
+																		quero <-"N"
+																	  caso 2:
+																		Cliente[n].Nascimento.mes <- "Fevereiro"
+																		quero <-"N"
+																	  caso 3:
+																		Cliente[n].Nascimento.mes <- "Março"
+																		quero <-"N"
+																	  caso 4:
+																		Cliente[n].Nascimento.mes <- "Abril"
+																		quero <-"N"
+																	  caso 5:
+																		Cliente[n].Nascimento.mes <- "Maio"
+																		quero <-"N"
+																	  caso 6:
+																		Cliente[n].Nascimento.mes <- "Junho"
+																		quero <-"N"
+																	  caso 7:
+																		Cliente[n].Nascimento.mes <- "Julho"
+																		quero <-"N"
+																	  caso 8:
+																		Cliente[n].Nascimento.mes <- "Agosto"
+																		quero <-"N"
+																	  caso 9:
+																	    Cliente[n].Nascimento.mes <- "Setembro"
+																	    quero <-"N"
+																	  caso 10:
+																		Cliente[n].Nascimento.mes <- "Outubro"
+																		quero <-"N"
+																	  caso 11:
+																		Cliente[n].Nascimento.mes <- "Novembro"
+																		quero <-"N"
+																	  caso 12:
+																		Cliente[n].Nascimento.mes <- "Dezembro"
+																		quero <-"N"
+																	  defeito:
+																	    limpatela
+																	    mostre"Essa possibilidade nao existe\n\n"
+																		quero <-"S"
+																	fimescolha
+																	Fimenquanto
+															    Fimse
+																se Cliente[n].Nascimento.dia=30 entao
+																	Cliente[n].Nascimento.dia <- Cliente[n].Nascimento.dia
+																	    enquanto quero="S" faca
+																		mostre "Dia: ",Cliente[n].Nascimento.dia,"\n"
+																		mostre "Escolha o seu mes:\n"
+																		mostre " [01] Janeiro\n"
+																		mostre " [03] Março\n"
+																		mostre " [04] Abril\n"
+																		mostre " [05] Maio\n"
+																		mostre " [06] Junho\n"
+																		mostre " [07] Julho\n"
+																		mostre " [08] Agosto\n"
+																		mostre " [09] Setembro\n"
+																		mostre " [10] Outubro\n"
+																		mostre " [11] Novembro\n"
+																		mostre " [12] Dezembro\n"
+																		leia opcao
+																	escolha opcao
+																	  caso 1:
+																		Cliente[n].Nascimento.mes <- "Janeiro" 
+																		quero <-"N"
+																	  caso 3:
+																		Cliente[n].Nascimento.mes <- "Março"
+																		quero <-"N"
+																	  caso 4:
+																		Cliente[n].Nascimento.mes <- "Abril"
+																		quero <-"N"
+																	  caso 5:
+																		Cliente[n].Nascimento.mes <- "Maio"
+																		quero <-"N"
+																	  caso 6:
+																		Cliente[n].Nascimento.mes <- "Junho"
+																		quero <-"N"
+																	  caso 7:
+																		Cliente[n].Nascimento.mes <- "Julho"
+																		quero <-"N"
+																	  caso 8:
+																		Cliente[n].Nascimento.mes <- "Agosto"
+																		quero <-"N"
+																	  caso 9:
+																	    Cliente[n].Nascimento.mes <- "Setembro"
+																	    quero <-"N"
+																	  caso 10:
+																		Cliente[n].Nascimento.mes <- "Outubro"
+																		quero <-"N"
+																	  caso 11:
+																		Cliente[n].Nascimento.mes <- "Novembro"
+																		quero <-"N"
+																	  caso 12:
+																		Cliente[n].Nascimento.mes <- "Dezembro"
+																		quero <-"N"
+																	  defeito:
+																	    limpatela
+																	    mostre"Essa possibilidade nao existe\n\n"
+																		quero <-"S"
+																	fimescolha
+																	Fimenquanto
+																	Fimse
+													                se Cliente[n].Nascimento.dia=31 entao
+													                	Cliente[n].Nascimento.dia <- Cliente[n].Nascimento.dia
+																		enquanto quero="S" faca
+																		mostre "Dia: ",Cliente[n].Nascimento.dia,"\n"
+																		mostre "Escolha o seu mes:\n"
+																		mostre " [01] Janeiro\n"
+																		mostre " [03] Março\n"
+																		mostre " [05] Maio\n"
+																		mostre " [07] Julho\n"
+																		mostre " [08] Agosto\n"
+																		mostre " [10] Outubro\n"
+																		mostre " [12] Dezembro\n"
+																		leia opcao
+																	escolha opcao
+																	  caso 1:
+																		Cliente[n].Nascimento.mes <- "Janeiro"
+																		quero <-"N"
+																	  caso 3:
+																		Cliente[n].Nascimento.mes <- "Março"
+																		quero <-"N"
+																	  caso 5:
+																		Cliente[n].Nascimento.mes <- "Maio"
+																		quero <-"N"
+																	  caso 7:
+																		Cliente[n].Nascimento.mes <- "Julho"
+																		quero <-"N"
+																	  caso 8:
+																		Cliente[n].Nascimento.mes <- "Agosto"
+																		quero <-"N"
+																	  caso 10:
+																		Cliente[n].Nascimento.mes <- "Outubro"
+																		quero <-"N"
+																	  caso 12:
+																		Cliente[n].Nascimento.mes <- "Dezembro"
+																		quero <-"N"
+																	  defeito:
+																	    limpatela
+																	    mostre"Essa possibilidade nao existe\n\n"
+																		quero <-"S"
+																	fimescolha
+																	Fimenquanto
+																	Fimse
+															quero<-"N"
+															senao
+																mostre"Esse dia nao existe\n\n"
+																quero<-"S"
+															Fimse
+														    fimenquanto
+														    limpatela
+														    quero<-"S"
+														    enquanto quero="S" faca
+															  mostre"Dia: ",Cliente[n].Nascimento.dia,"\n"
+														      mostre"Mês: ",Cliente[n].Nascimento.mes,"\n"
+												              mostre "Insira o ano de nascimento: "
+														      leia Cliente[n].Nascimento.ano
+															  limpatela
+															  se Cliente[n].Nascimento.ano >=1900 e Cliente[n].Nascimento.ano <=2024 entao
+																Cliente[n].Nascimento.ano <- Cliente[n].Nascimento.ano
+																quero <-"N"
+															  senao
+																quero <-"S"
+																mostre"Nâo e possivel registar este ano\n\n"
+															  fimse
+														    fimenquanto	
+													defeito:
+											           limpatela
+												fimescolha			
+								             fimse       
+								        fimpara
+									fimse 
+									mostre"\n"									    
+								    mostre "Deseja atualizar mais dados ?! [S]/[N] \n"
+								    leia quero
+								    limpatela
+							    fimenquanto
+							    quero<-"S"
+					  Caso 1:
+							limpatela
+								enquanto quero="S" faca	
+									mostre"Digite o nome da empresa que deseja atualizar:\n"
+									leia NomeProcurado
+							        limpatela
+									Procurados <- 0
+									para n de 0 ate ClientesCadastradoEm-1
+										se ClienteEm[n].Nome = NomeProcurado entao
+									    mostre "==============================================\n"
+										mostre "Nº ", ClienteEm[n].NumeroDeOrdem ,"\n"
+										mostre "Codigo de identificacao: ",ClienteEm[n].Codigo,"\n"
+									    mostre "Nome da empresa: ", ClienteEm[n].Nome,"\n"
+									    mostre "Numero de Identificacao Fiscal: ", ClienteEm[n].NIF,"\n"
+									    mostre "Numero de telefone: ",ClienteEm[n].Telefone,"\n"
+									    mostre "Data de criação da empresa: ",ClienteEm[n].Nascimento.dia," de ",ClienteEm[n].Nascimento.mes," de ",ClienteEm[n].Nascimento.ano,"\n"
+									    mostre "==============================================\n"				
+									    Procurados <- Procurados+1
+								        fimse
+									fimpara
+								
+									se Procurados > 1 entao	
+											
+												mostre"Digite o numero de ordem do cliente que deseja atualizar:\n"
+											    leia NumeroProcurado	
+												limpatela
+												para n de 0 ate ClientesCadastradoEm-1
+												se ClienteEm[n].NumeroDeOrdem = NumeroProcurado entao											   
+												    mostre "==============================================\n"
+													mostre "Nº ", ClienteEm[n].NumeroDeOrdem ,"\n"
+													mostre "Codigo de identificacao: ",ClienteEm[n].Codigo,"\n"
+												    mostre "Nome da empresa: ", ClienteEm[n].Nome,"\n"
+												    mostre "Numero de Identificacao Fiscal: ", ClienteEm[n].NIF,"\n"
+												    mostre "Numero de telefone: ",ClienteEm[n].Telefone,"\n"
+												    mostre "Data de criação da empresa: ",ClienteEm[n].Nascimento.dia," de ",ClienteEm[n].Nascimento.mes," de ",ClienteEm[n].Nascimento.ano,"\n"
+												    mostre "==============================================\n\n"				
+													mostre "O que deseja atualizar:\n"
+													mostre " [1] Nome: \n"
+													mostre " [2] Numero do identificacao fiscal [NIF]: \n"
+													mostre " [3] Numero de telefone: \n"
+													mostre " [4] Data de criacao da empresa: \n"
+													mostre " [5] Sair\n"
+													leia opcao
+														escolha opcao
+														    caso 1:	
+													           limpatela
+																q <- ClienteEm[n].Nome
+															    mostre "Nome antigo: ",q,"\n" 
+																mostre "Escreva o novo nome: "
+																leia ClienteEm[n].Nome														
+															caso 2:
+													           limpatela
+																p <- ClienteEm[n].NIF
+															    mostre "Numero de identificacao fiscal [NIF] antigo: ",p,"\n" 
+																mostre "Escreva o novo NIF: "
+																leia ClienteEm[n].NIF		
+															caso 3:
+													           limpatela
+													           quero <-"S"
+																p <- ClienteEm[n].Telefone
+																enquanto quero="S" faca
+																    mostre "Antigo numero de telefone: ",p,"\n" 
+																	mostre "Insira o novo número de telefone : "
+																	leia ClienteEm[n].Telefone
+																	se ClienteEm[n].Telefone <= 999999999 e ClienteEm[n].Telefone >= 900000000 entao
+																		ClienteEm[n].Telefone <- ClienteEm[n].Telefone
+																		quero <-"N"
+																	senao
+																		limpatela
+																		mostre "O número de telefone inserido não existe !\n\n"
+																		quero <-"S"
+																	fimse
+																fimenquanto
+															caso 4:
+													            limpatela
+													            quero<-"S"
+																enquanto quero="S" faca
+																	mostre "Insira o dia de criação da empresa: "
+																	leia ClienteEm[n].Nascimento.dia
+																	limpatela
+																	se ClienteEm[n].Nascimento.dia >=01 e ClienteEm[n].Nascimento.dia <=31 entao
+																		se ClienteEm[n].Nascimento.dia >=01 e ClienteEm[n].Nascimento.dia <=29 entao
+																				ClienteEm[n].Nascimento.dia <- ClienteEm[n].Nascimento.dia
+																				enquanto quero="S" faca
+																				mostre "Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+																				mostre "Escolha o seu mes:\n"
+																				mostre " [01] Janeiro\n"
+																				mostre " [02] Fevereiro\n"
+																				mostre " [03] Março\n"
+																				mostre " [04] Abril\n"
+																				mostre " [05] Maio\n"
+																				mostre " [06] Junho\n"
+																				mostre " [07] Julho\n"
+																				mostre " [08] Agosto\n"
+																				mostre " [09] Setembro\n"
+																				mostre " [10] Outubro\n"
+																				mostre " [11] Novembro\n"
+																				mostre " [12] Dezembro\n"
+																				leia opcao
+																			escolha opcao
+																			  caso 1:
+																				ClienteEm[n].Nascimento.mes <- "Janeiro"
+																				quero <-"N"
+																			  caso 2:
+																				ClienteEm[n].Nascimento.mes <- "Fevereiro"
+																				quero <-"N"
+																			  caso 3:
+																				ClienteEm[n].Nascimento.mes <- "Março"
+																				quero <-"N"
+																			  caso 4:
+																				ClienteEm[n].Nascimento.mes <- "Abril"
+																				quero <-"N"
+																			  caso 5:
+																				ClienteEm[n].Nascimento.mes <- "Maio"
+																				quero <-"N"
+																			  caso 6:
+																				ClienteEm[n].Nascimento.mes <- "Junho"
+																				quero <-"N"
+																			  caso 7:
+																				ClienteEm[n].Nascimento.mes <- "Julho"
+																				quero <-"N"
+																			  caso 8:
+																				ClienteEm[n].Nascimento.mes <- "Agosto"
+																				quero <-"N"
+																			  caso 9:
+																			    ClienteEm[n].Nascimento.mes <- "Setembro"
+																			    quero <-"N"
+																			  caso 10:
+																				ClienteEm[n].Nascimento.mes <- "Outubro"
+																				quero <-"N"
+																			  caso 11:
+																				ClienteEm[n].Nascimento.mes <- "Novembro"
+																				quero <-"N"
+																			  caso 12:
+																				ClienteEm[n].Nascimento.mes <- "Dezembro"
+																				quero <-"N"
+																			  defeito:
+																			    limpatela
+																			    mostre"Essa possibilidade nao existe\n\n"
+																				quero <-"S"
+																			fimescolha
+																			Fimenquanto
+																	    Fimse
+																		se ClienteEm[n].Nascimento.dia=30 entao
+																			ClienteEm[n].Nascimento.dia <- ClienteEm[n].Nascimento.dia
+																			    enquanto quero="S" faca
+																				mostre "Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+																				mostre "Escolha o seu mes:\n"
+																				mostre " [01] Janeiro\n"
+																				mostre " [03] Março\n"
+																				mostre " [04] Abril\n"
+																				mostre " [05] Maio\n"
+																				mostre " [06] Junho\n"
+																				mostre " [07] Julho\n"
+																				mostre " [08] Agosto\n"
+																				mostre " [09] Setembro\n"
+																				mostre " [10] Outubro\n"
+																				mostre " [11] Novembro\n"
+																				mostre " [12] Dezembro\n"
+																				leia opcao
+																			escolha opcao
+																			  caso 1:
+																				ClienteEm[n].Nascimento.mes <- "Janeiro" 
+																				quero <-"N"
+																			  caso 3:
+																				ClienteEm[n].Nascimento.mes <- "Março"
+																				quero <-"N"
+																			  caso 4:
+																				ClienteEm[n].Nascimento.mes <- "Abril"
+																				quero <-"N"
+																			  caso 5:
+																				ClienteEm[n].Nascimento.mes <- "Maio"
+																				quero <-"N"
+																			  caso 6:
+																				ClienteEm[n].Nascimento.mes <- "Junho"
+																				quero <-"N"
+																			  caso 7:
+																				ClienteEm[n].Nascimento.mes <- "Julho"
+																				quero <-"N"
+																			  caso 8:
+																				ClienteEm[n].Nascimento.mes <- "Agosto"
+																				quero <-"N"
+																			  caso 9:
+																			    ClienteEm[n].Nascimento.mes <- "Setembro"
+																			    quero <-"N"
+																			  caso 10:
+																				ClienteEm[n].Nascimento.mes <- "Outubro"
+																				quero <-"N"
+																			  caso 11:
+																				ClienteEm[n].Nascimento.mes <- "Novembro"
+																				quero <-"N"
+																			  caso 12:
+																				ClienteEm[n].Nascimento.mes <- "Dezembro"
+																				quero <-"N"
+																			  defeito:
+																			    limpatela
+																			    mostre"Essa possibilidade nao existe\n\n"
+																				quero <-"S"
+																			fimescolha
+																			Fimenquanto
+																			Fimse
+															                se ClienteEm[n].Nascimento.dia=31 entao
+															                	ClienteEm[n].Nascimento.dia <- ClienteEm[n].Nascimento.dia
+																				enquanto quero="S" faca
+																				mostre "Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+																				mostre "Escolha o seu mes:\n"
+																				mostre " [01] Janeiro\n"
+																				mostre " [03] Março\n"
+																				mostre " [05] Maio\n"
+																				mostre " [07] Julho\n"
+																				mostre " [08] Agosto\n"
+																				mostre " [10] Outubro\n"
+																				mostre " [12] Dezembro\n"
+																				leia opcao
+																			escolha opcao
+																			  caso 1:
+																				ClienteEm[n].Nascimento.mes <- "Janeiro"
+																				quero <-"N"
+																			  caso 3:
+																				ClienteEm[n].Nascimento.mes <- "Março"
+																				quero <-"N"
+																			  caso 5:
+																				ClienteEm[n].Nascimento.mes <- "Maio"
+																				quero <-"N"
+																			  caso 7:
+																				ClienteEm[n].Nascimento.mes <- "Julho"
+																				quero <-"N"
+																			  caso 8:
+																				ClienteEm[n].Nascimento.mes <- "Agosto"
+																				quero <-"N"
+																			  caso 10:
+																				ClienteEm[n].Nascimento.mes <- "Outubro"
+																				quero <-"N"
+																			  caso 12:
+																				ClienteEm[n].Nascimento.mes <- "Dezembro"
+																				quero <-"N"
+																			  defeito:
+																			    limpatela
+																			    mostre"Essa possibilidade nao existe\n\n"
+																				quero <-"S"
+																			fimescolha
+																			Fimenquanto
+																			Fimse
+																	quero<-"N"
+																	senao
+																		mostre"Esse dia nao existe\n\n"
+																		quero<-"S"
+																	Fimse
+																    fimenquanto
+																    limpatela
+																    quero<-"S"
+																    enquanto quero="S" faca
+																	  mostre"Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+																      mostre"Mês: ",ClienteEm[n].Nascimento.mes,"\n"
+														              mostre "Insira o ano de criação da empresa: "
+																      leia ClienteEm[n].Nascimento.ano
+																	  limpatela
+																	  se ClienteEm[n].Nascimento.ano >=1900 e ClienteEm[n].Nascimento.ano <=2024 entao
+																		ClienteEm[n].Nascimento.ano <- ClienteEm[n].Nascimento.ano
+																		quero <-"N"
+																	  senao
+																		quero <-"S"
+																		mostre"Nâo e possivel registar este ano\n\n"
+																	  fimse
+																    fimenquanto	
+															defeito:
+													           limpatela
+														fimescolha
+												fimse
+											fimpara
+								    fimse
+								    
+								    se Procurados = 1 entao								
+										para n de 0 ate ClientesCadastradoEm-1
+											se ClienteEm[n].Nome = NomeProcurado entao 				
+													mostre "O que deseja atualizar:\n"
+													mostre " [1] Nome: \n"
+													mostre " [2] Numero do identificacao fiscal: \n"
+													mostre " [3] Numero de telefone: \n"
+													mostre " [4] Data de criacao da empresa: \n"
+													mostre " [5] Sair\n"
+													leia opcao													
+													escolha opcao
+													    caso 1:	
+												           limpatela
+															q <- ClienteEm[n].Nome
+														    mostre "Nome antigo: ",q,"\n" 
+															mostre "Escreva o novo nome: "
+															leia ClienteEm[n].Nome													
+														caso 2:
+												           limpatela
+															p <- ClienteEm[n].NIF
+														    mostre "Numero de identificacao fiscal antigo [NIF]: ",p,"\n" 
+															mostre "Escreva o novo NIF: "
+															leia ClienteEm[n].NIF		
+														caso 3:
+												           limpatela
+												           quero <-"S"
+															p <- ClienteEm[n].Telefone
+															enquanto quero="S" faca
+															    mostre "Antigo numero de telefone: ",p,"\n" 
+																mostre "Insira o novo número de telefone : "
+																leia ClienteEm[n].Telefone
+																se ClienteEm[n].Telefone <= 999999999 e ClienteEm[n].Telefone >= 900000000 entao
+																	ClienteEm[n].Telefone <- ClienteEm[n].Telefone
+																	quero <-"N"
+																senao
+																	limpatela
+																	mostre "O número de telefone inserido não existe !\n\n"
+																	quero <-"S"
+																fimse
+															fimenquanto
+														caso 4:
+												            limpatela
+												            quero<-"S"
+															enquanto quero="S" faca
+																mostre "Insira o dia de criação da empresa: "
+																leia ClienteEm[n].Nascimento.dia
+																limpatela
+																se ClienteEm[n].Nascimento.dia >=01 e ClienteEm[n].Nascimento.dia <=31 entao
+																	se ClienteEm[n].Nascimento.dia >=01 e ClienteEm[n].Nascimento.dia <=29 entao
+																			ClienteEm[n].Nascimento.dia <- ClienteEm[n].Nascimento.dia
+																			enquanto quero="S" faca
+																			mostre "Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+																			mostre "Escolha o seu mes:\n"
+																			mostre " [01] Janeiro\n"
+																			mostre " [02] Fevereiro\n"
+																			mostre " [03] Março\n"
+																			mostre " [04] Abril\n"
+																			mostre " [05] Maio\n"
+																			mostre " [06] Junho\n"
+																			mostre " [07] Julho\n"
+																			mostre " [08] Agosto\n"
+																			mostre " [09] Setembro\n"
+																			mostre " [10] Outubro\n"
+																			mostre " [11] Novembro\n"
+																			mostre " [12] Dezembro\n"
+																			leia opcao
+																		escolha opcao
+																		  caso 1:
+																			ClienteEm[n].Nascimento.mes <- "Janeiro"
+																			quero <-"N"
+																		  caso 2:
+																			ClienteEm[n].Nascimento.mes <- "Fevereiro"
+																			quero <-"N"
+																		  caso 3:
+																			ClienteEm[n].Nascimento.mes <- "Março"
+																			quero <-"N"
+																		  caso 4:
+																			ClienteEm[n].Nascimento.mes <- "Abril"
+																			quero <-"N"
+																		  caso 5:
+																			ClienteEm[n].Nascimento.mes <- "Maio"
+																			quero <-"N"
+																		  caso 6:
+																			ClienteEm[n].Nascimento.mes <- "Junho"
+																			quero <-"N"
+																		  caso 7:
+																			ClienteEm[n].Nascimento.mes <- "Julho"
+																			quero <-"N"
+																		  caso 8:
+																			ClienteEm[n].Nascimento.mes <- "Agosto"
+																			quero <-"N"
+																		  caso 9:
+																		    ClienteEm[n].Nascimento.mes <- "Setembro"
+																		    quero <-"N"
+																		  caso 10:
+																			ClienteEm[n].Nascimento.mes <- "Outubro"
+																			quero <-"N"
+																		  caso 11:
+																			ClienteEm[n].Nascimento.mes <- "Novembro"
+																			quero <-"N"
+																		  caso 12:
+																			ClienteEm[n].Nascimento.mes <- "Dezembro"
+																			quero <-"N"
+																		  defeito:
+																		    limpatela
+																		    mostre"Essa possibilidade nao existe\n\n"
+																			quero <-"S"
+																		fimescolha
+																		Fimenquanto
+																    Fimse
+																	se ClienteEm[n].Nascimento.dia=30 entao
+																		ClienteEm[n].Nascimento.dia <- ClienteEm[n].Nascimento.dia
+																		    enquanto quero="S" faca
+																			mostre "Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+																			mostre "Escolha o seu mes:\n"
+																			mostre " [01] Janeiro\n"
+																			mostre " [03] Março\n"
+																			mostre " [04] Abril\n"
+																			mostre " [05] Maio\n"
+																			mostre " [06] Junho\n"
+																			mostre " [07] Julho\n"
+																			mostre " [08] Agosto\n"
+																			mostre " [09] Setembro\n"
+																			mostre " [10] Outubro\n"
+																			mostre " [11] Novembro\n"
+																			mostre " [12] Dezembro\n"
+																			leia opcao
+																		escolha opcao
+																		  caso 1:
+																			ClienteEm[n].Nascimento.mes <- "Janeiro" 
+																			quero <-"N"
+																		  caso 3:
+																			ClienteEm[n].Nascimento.mes <- "Março"
+																			quero <-"N"
+																		  caso 4:
+																			ClienteEm[n].Nascimento.mes <- "Abril"
+																			quero <-"N"
+																		  caso 5:
+																			ClienteEm[n].Nascimento.mes <- "Maio"
+																			quero <-"N"
+																		  caso 6:
+																			ClienteEm[n].Nascimento.mes <- "Junho"
+																			quero <-"N"
+																		  caso 7:
+																			ClienteEm[n].Nascimento.mes <- "Julho"
+																			quero <-"N"
+																		  caso 8:
+																			ClienteEm[n].Nascimento.mes <- "Agosto"
+																			quero <-"N"
+																		  caso 9:
+																		    ClienteEm[n].Nascimento.mes <- "Setembro"
+																		    quero <-"N"
+																		  caso 10:
+																			ClienteEm[n].Nascimento.mes <- "Outubro"
+																			quero <-"N"
+																		  caso 11:
+																			ClienteEm[n].Nascimento.mes <- "Novembro"
+																			quero <-"N"
+																		  caso 12:
+																			ClienteEm[n].Nascimento.mes <- "Dezembro"
+																			quero <-"N"
+																		  defeito:
+																		    limpatela
+																		    mostre"Essa possibilidade nao existe\n\n"
+																			quero <-"S"
+																		fimescolha
+																		Fimenquanto
+																		Fimse
+														                se ClienteEm[n].Nascimento.dia=31 entao
+														                	ClienteEm[n].Nascimento.dia <- ClienteEm[n].Nascimento.dia
+																			enquanto quero="S" faca
+																			mostre "Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+																			mostre "Escolha o seu mes:\n"
+																			mostre " [01] Janeiro\n"
+																			mostre " [03] Março\n"
+																			mostre " [05] Maio\n"
+																			mostre " [07] Julho\n"
+																			mostre " [08] Agosto\n"
+																			mostre " [10] Outubro\n"
+																			mostre " [12] Dezembro\n"
+																			leia opcao
+																		escolha opcao
+																		  caso 1:
+																			ClienteEm[n].Nascimento.mes <- "Janeiro"
+																			quero <-"N"
+																		  caso 3:
+																			ClienteEm[n].Nascimento.mes <- "Março"
+																			quero <-"N"
+																		  caso 5:
+																			ClienteEm[n].Nascimento.mes <- "Maio"
+																			quero <-"N"
+																		  caso 7:
+																			ClienteEm[n].Nascimento.mes <- "Julho"
+																			quero <-"N"
+																		  caso 8:
+																			ClienteEm[n].Nascimento.mes <- "Agosto"
+																			quero <-"N"
+																		  caso 10:
+																			ClienteEm[n].Nascimento.mes <- "Outubro"
+																			quero <-"N"
+																		  caso 12:
+																			ClienteEm[n].Nascimento.mes <- "Dezembro"
+																			quero <-"N"
+																		  defeito:
+																		    limpatela
+																		    mostre"Essa possibilidade nao existe\n\n"
+																			quero <-"S"
+																		fimescolha
+																		Fimenquanto
+																		Fimse
+																quero<-"N"
+																senao
+																	mostre"Esse dia nao existe\n\n"
+																	quero<-"S"
+																Fimse
+															    fimenquanto
+															    limpatela
+															    quero<-"S"
+															    enquanto quero="S" faca
+																  mostre"Dia: ",ClienteEm[n].Nascimento.dia,"\n"
+															      mostre"Mês: ",ClienteEm[n].Nascimento.mes,"\n"
+													              mostre "Insira o ano de criação da empresa: "
+															      leia ClienteEm[n].Nascimento.ano
+																  limpatela
+																  se ClienteEm[n].Nascimento.ano >=1900 e ClienteEm[n].Nascimento.ano <=2024 entao
+																	ClienteEm[n].Nascimento.ano <- ClienteEm[n].Nascimento.ano
+																	quero <-"N"
+																  senao
+																	quero <-"S"
+																	mostre"Nâo e possivel registar este ano\n\n"
+																  fimse
+															    fimenquanto	
+														defeito:
+												           limpatela
+													fimescolha				
+								             fimse       
+								        fimpara
+									fimse 
+									mostre"\n"
+								    mostre "Deseja atualizar mais dados de empresas ?! [S]/[N] \n"
+								    leia quero
+								    limpatela
+							    fimenquanto
+							    quero<-"S"
+					  defeito:
+					  	  limpatela
+					  	  quero<-"N"
+				fimEscolha
+				fimenquanto
+			    quero<-"S"					
+			caso 8:
+				limpatela
+				enquanto quero="S" faca
+				mostre "Escolha a opcao que deseja\n"
+				mostre " [0] Contas particulares\n"
+				mostre " [1] Contas empresariais\n"
+				mostre " [2] Ambas\n"
+				mostre " [3] Sair\n"
+				leia tipodeconta
+				Escolha tipodeconta
+					  caso 0:
+						limpatela
+                        ListarClientesParticular()
+						 mostre "pretende ver outras listas ?![S]/[N]\n"
+						 leia quero
+						 limpatela
+					  Caso 1:
+						 limpatela
+						 ListarClientesEmpresariais()			 			
+						 mostre "pretende ver outras listas ?![S]/[N]\n"
+						 leia quero
+						 limpatela
+ 				      Caso 2:
+						  limpatela
+                          ListarClientesParticular()
+	                      ListarClientesEmpresariais()
+                          mostre "pretende ver as listas de forma separada ?![S]/[N]\n"
+						  leia quero
+						  limpatela
+					  defeito:
+					  	  limpatela
+					  	  quero<-"N"
+				fimEscolha
+				fimenquanto
+			    quero<-"S"		
+			caso 9:
+				limpatela
+				enquanto quero="S" faca
+
+
+				mostre"\n"			   
+			    mostre "Deseja fazer mais copia de segurança ?! [S]/[N] \n"
+			    leia quero
+			    limpatela
+			    fimenquanto
+			    quero<-"S"			
+			caso 10:
+				limpatela
+				enquanto quero="S" faca
+
+			   
+				mostre"\n"			    
+			    mostre "Deseja atualizar mais dados ?! [S]/[N] \n"
+			    leia quero
+			    limpatela
+			    fimenquanto
+			    quero<-"S"			
+			caso 11:
+				limpatela
+				quero<-"S"
+				enquanto quero="S" faca
+					mostre "Escolha o tipo de conta que pretende criar: \n"
+					mostre "[0] Conta particular \n"
+					mostre "[1] Conta empresarial \n"
+					mostre "[2] Sair \n"
+					leia tipodeconta
+					escolha tipodeconta
+					  caso 0:
+						    limpatela
+							mostre "Conta particular \n"
+							enquanto quero="S" faca
+							   	mostre "insira o codigo do cliente :"
+					            leia codigo
+							    limpatela
+							    para n de 0 ate ClientesCadastrado-1
+							    	se codigo = Cliente[n].Codigo entao
+		                              MeusDados(Cliente[n])
+							    	fimse
+							    fimpara
+   							mostre"\n" 							
+							mostre "Pretende ver mais dados particular ?! [S]/[N]"		
+							leia quero
+							limpatela
+						fimenquanto
+						quero<-"S"
+					  caso 1:
+					    limpatela
+						mostre "Conta empresarial \n"
+						enquanto quero="S" faca
+						   	mostre "insira o codigo do cliente :"
+				            leia codigo
+						    limpatela
+						    para n de 0 ate ClientesCadastradoEm-1
+						    	se codigo = ClienteEm[n].Codigo entao
+	                              MeusDadosEm(ClienteEm[n])
+						    	fimse
+						    fimpara
+						mostre"\n"
+						mostre "Pretende ver mais dados empresarial ?! [S]/[N]"		
+						leia quero
+						limpatela
+					   fimenquanto
+					   quero<-"S"
+				      defeito:
+				        limpatela
+				        quero<-"N"
+					fimescolha
+				fimenquanto
+			    quero<-"S"				
+			defeito:
+			    Limpatela
+				quero<-"N"
+				mostre "Foi um prazer poder ajudá-lo !\n"
+				mostre "Volte sempre !\n"		
+		FimEscolha
+    fimenquanto
+fimalgoritmo        		   
